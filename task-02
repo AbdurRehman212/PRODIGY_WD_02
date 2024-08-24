@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch Application</title>
+    <link rel="stylesheet" href="task02.css">
+</head>
+<body>
+    <div class="stopwatch">
+        <h1>Stopwatch</h1>
+        <div id="display">00:00:00</div>
+        <div class="controls">
+            <button id="startStop">Start</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+        <ul id="laps"></ul>
+    </div>
+    <script src="task02.js"></script>
+</body>
+</html>
+
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.stopwatch {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+#display {
+    font-size: 48px;
+    margin: 20px 0;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+button {
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 0 5px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#laps {
+    list-style-type: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+#laps li {
+    padding: 5px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+
+let display = document.getElementById('display');
+let startStop = document.getElementById('startStop');
+let reset = document.getElementById('reset');
+let lap = document.getElementById('lap');
+let laps = document.getElementById('laps');
+
+let startTime;
+let elapsedTime = 0;
+let timerInterval;
+let running = false;
+let lapTimes = [];
+
+function formatTime(time) {
+    let hours = Math.floor(time / 3600000);
+    let minutes = Math.floor((time % 3600000) / 60000);
+    let seconds = Math.floor((time % 60000) / 1000);
+    let milliseconds = Math.floor((time % 1000) / 10);
+
+    return (
+        (hours < 10 ? '0' + hours : hours) + ':' +
+        (minutes < 10 ? '0' + minutes : minutes) + ':' +
+        (seconds < 10 ? '0' + seconds : seconds) + '.' +
+        (milliseconds < 10 ? '0' + milliseconds : milliseconds)
+    );
+}
+
+function updateDisplay() {
+    display.textContent = formatTime(elapsedTime);
+}
+
+function startStopTimer() {
+    if (running) {
+        clearInterval(timerInterval);
+        startStop.textContent = 'Start';
+        running = false;
+    } else {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(function() {
+            elapsedTime = Date.now() - startTime;
+            updateDisplay();
+        }, 10);
+        startStop.textContent = 'Stop';
+        running = true;
+    }
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    elapsedTime = 0;
+    updateDisplay();
+    startStop.textContent = 'Start';
+    running = false;
+    lapTimes = [];
+    laps.innerHTML = '';
+}
+
+function recordLap() {
+    if (running) {
+        let lapTime = elapsedTime;
+        lapTimes.push(lapTime);
+        let li = document.createElement('li');
+        li.textContent = `Lap ${lapTimes.length}: ${formatTime(lapTime)}`;
+        laps.insertBefore(li, laps.firstChild);
+    }
+}
+
+startStop.addEventListener('click', startStopTimer);
+reset.addEventListener('click', resetTimer);
+lap.addEventListener('click', recordLap);
+
+updateDisplay();
